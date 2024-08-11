@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import messagebox
+import matplotlib.pyplot as plt
 
 # Список транзакций
 transactions = []
@@ -29,6 +30,28 @@ def update_transactions_list():
     transaction_list.delete(0, tk.END)
     for transaction in transactions:
         transaction_list.insert(tk.END, f"{transaction['category']}: {transaction['description']} ({transaction['amount']:.2f} руб.)")
+
+def plot_expenses():
+    expenses = {}
+    for transaction in transactions:
+        if transaction['amount'] < 0:
+            category = transaction['category']
+            amount = abs(transaction['amount'])
+            if category in expenses:
+                expenses[category] += amount
+            else:
+                expenses[category] = amount
+
+    if expenses:
+        categories = list(expenses.keys())
+        amounts = list(expenses.values())
+
+        plt.figure(figsize=(8, 6))
+        plt.pie(amounts, labels=categories, autopct='%1.1f%%', startangle=140)
+        plt.title('Расходы по категориям')
+        plt.show()
+    else:
+        messagebox.showinfo("Нет данных", "Пока нет расходов для отображения.")
 
 def main():
     global balance_label, transaction_list
@@ -68,6 +91,9 @@ def main():
                                                                    description_entry.get(),
                                                                    "расход"))
     add_expense_button.grid(row=3, column=1, pady=10)
+
+    plot_button = tk.Button(root, text="Показать график расходов", command=plot_expenses)
+    plot_button.pack(pady=10)
 
     balance_label = tk.Label(root, text="Баланс: 0.00 руб.")
     balance_label.pack(pady=10)
