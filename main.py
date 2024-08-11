@@ -3,6 +3,7 @@ from tkinter import messagebox, simpledialog, ttk
 import json
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from ttkthemes import ThemedTk
 
 # Путь к файлу для сохранения данных
 DATA_FILE = "transactions_data.json"
@@ -151,19 +152,19 @@ def edit_transaction():
 def main():
     global balance_label, transaction_list, category_var, category_menu, fig, canvas
 
-    root = tk.Tk()
+    root = ThemedTk(theme="breeze")  # Используем библиотеку ttkthemes
     root.title("Учёт финансов")
-    root.geometry("800x600")
-    root.configure(bg="#f0f0f0")
+    root.geometry("1200x900")  # Увеличиваем размер окна
+    root.configure(bg="#eaf5e0")
 
     load_data()  # Загрузка данных из файла при старте
 
     # Основной фрейм
-    main_frame = tk.Frame(root, bg="#f0f0f0")
-    main_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
+    main_frame = tk.Frame(root, bg="#eaf5e0", padx=20, pady=20)
+    main_frame.pack(fill=tk.BOTH, expand=True)
 
     # Заголовок
-    title_label = tk.Label(main_frame, text="Учёт финансов", font=("Helvetica", 18, "bold"), bg="#f0f0f0")
+    title_label = tk.Label(main_frame, text="Учёт финансов", font=("Helvetica", 20, "bold"), bg="#eaf5e0", fg="#4a773c")
     title_label.pack(pady=(0, 20))
 
     input_frame = tk.Frame(main_frame, bg="#ffffff", padx=10, pady=10, relief=tk.RAISED, borderwidth=1)
@@ -181,7 +182,7 @@ def main():
     category_var.set(categories[0])  # Установить начальное значение
 
     category_menu = tk.OptionMenu(input_frame, category_var, *categories)
-    category_menu.config(font=("Helvetica", 12))
+    category_menu.config(font=("Helvetica", 12), bg="#d8e8d0")
     category_menu.grid(row=1, column=1, padx=5, pady=5)
 
     description_label = tk.Label(input_frame, text="Описание:", font=("Helvetica", 12), bg="#ffffff")
@@ -192,29 +193,30 @@ def main():
     button_frame = tk.Frame(main_frame, bg="#ffffff")
     button_frame.pack(fill=tk.X, pady=(0, 20))
 
-    add_income_button = tk.Button(button_frame, text="Добавить доход", font=("Helvetica", 12),
+    add_income_button = tk.Button(button_frame, text="Добавить доход", font=("Helvetica", 12), bg="#a1d99b",
                                   command=lambda: add_transaction(amount_entry.get(), category_var.get(),
                                                                   description_entry.get(), "доход"))
     add_income_button.pack(side=tk.LEFT, padx=5, pady=5)
 
-    add_expense_button = tk.Button(button_frame, text="Добавить расход", font=("Helvetica", 12),
+    add_expense_button = tk.Button(button_frame, text="Добавить расход", font=("Helvetica", 12), bg="#fcba03",
                                    command=lambda: add_transaction(amount_entry.get(), category_var.get(),
                                                                    description_entry.get(), "расход"))
     add_expense_button.pack(side=tk.LEFT, padx=5, pady=5)
 
-    add_category_button = tk.Button(button_frame, text="Добавить новую категорию", font=("Helvetica", 12),
+    add_category_button = tk.Button(button_frame, text="Добавить новую категорию", font=("Helvetica", 12), bg="#a1d99b",
                                     command=add_new_category)
     add_category_button.pack(side=tk.LEFT, padx=5, pady=5)
 
-    delete_category_button = tk.Button(button_frame, text="Удалить категорию", font=("Helvetica", 12),
+    delete_category_button = tk.Button(button_frame, text="Удалить категорию", font=("Helvetica", 12), bg="#fcba03",
                                        command=delete_category)
     delete_category_button.pack(side=tk.LEFT, padx=5, pady=5)
 
     edit_transaction_button = tk.Button(button_frame, text="Редактировать транзакцию", font=("Helvetica", 12),
-                                        command=edit_transaction)
+                                        bg="#a1d99b", command=edit_transaction)
     edit_transaction_button.pack(side=tk.LEFT, padx=5, pady=5)
 
-    balance_label = tk.Label(main_frame, text="Баланс: 0.00 руб.", font=("Helvetica", 16, "bold"), bg="#f0f0f0")
+    balance_label = tk.Label(main_frame, text="Баланс: 0.00 руб.", font=("Helvetica", 16, "bold"), bg="#eaf5e0",
+                             fg="#4a773c")
     balance_label.pack(pady=(0, 20))
 
     transaction_list = tk.Listbox(main_frame, width=80, height=10, font=("Helvetica", 12))
