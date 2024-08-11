@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import messagebox, simpledialog
+from tkinter import messagebox, simpledialog, ttk
 import json
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
@@ -153,64 +153,76 @@ def main():
 
     root = tk.Tk()
     root.title("Учёт финансов")
-    root.minsize(600, 600)
+    root.geometry("800x600")
+    root.configure(bg="#f0f0f0")
 
     load_data()  # Загрузка данных из файла при старте
 
-    input_frame = tk.Frame(root)
-    input_frame.pack(pady=20)
+    # Основной фрейм
+    main_frame = tk.Frame(root, bg="#f0f0f0")
+    main_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
 
-    amount_label = tk.Label(input_frame, text="Сумма:")
-    amount_label.grid(row=0, column=0)
-    amount_entry = tk.Entry(input_frame)
-    amount_entry.grid(row=0, column=1)
+    # Заголовок
+    title_label = tk.Label(main_frame, text="Учёт финансов", font=("Helvetica", 18, "bold"), bg="#f0f0f0")
+    title_label.pack(pady=(0, 20))
 
-    category_label = tk.Label(input_frame, text="Категория:")
-    category_label.grid(row=1, column=0)
+    input_frame = tk.Frame(main_frame, bg="#ffffff", padx=10, pady=10, relief=tk.RAISED, borderwidth=1)
+    input_frame.pack(fill=tk.X, pady=(0, 20))
+
+    amount_label = tk.Label(input_frame, text="Сумма:", font=("Helvetica", 12), bg="#ffffff")
+    amount_label.grid(row=0, column=0, padx=5, pady=5, sticky=tk.W)
+    amount_entry = tk.Entry(input_frame, font=("Helvetica", 12))
+    amount_entry.grid(row=0, column=1, padx=5, pady=5)
+
+    category_label = tk.Label(input_frame, text="Категория:", font=("Helvetica", 12), bg="#ffffff")
+    category_label.grid(row=1, column=0, padx=5, pady=5, sticky=tk.W)
 
     category_var = tk.StringVar(root)
     category_var.set(categories[0])  # Установить начальное значение
 
     category_menu = tk.OptionMenu(input_frame, category_var, *categories)
-    category_menu.grid(row=1, column=1)
+    category_menu.config(font=("Helvetica", 12))
+    category_menu.grid(row=1, column=1, padx=5, pady=5)
 
-    description_label = tk.Label(input_frame, text="Описание:")
-    description_label.grid(row=2, column=0)
-    description_entry = tk.Entry(input_frame)
-    description_entry.grid(row=2, column=1)
+    description_label = tk.Label(input_frame, text="Описание:", font=("Helvetica", 12), bg="#ffffff")
+    description_label.grid(row=2, column=0, padx=5, pady=5, sticky=tk.W)
+    description_entry = tk.Entry(input_frame, font=("Helvetica", 12))
+    description_entry.grid(row=2, column=1, padx=5, pady=5)
 
-    add_income_button = tk.Button(input_frame, text="Добавить доход",
-                                  command=lambda: add_transaction(amount_entry.get(),
-                                                                  category_var.get(),
-                                                                  description_entry.get(),
-                                                                  "доход"))
-    add_income_button.grid(row=3, column=0, pady=10)
+    button_frame = tk.Frame(main_frame, bg="#ffffff")
+    button_frame.pack(fill=tk.X, pady=(0, 20))
 
-    add_expense_button = tk.Button(input_frame, text="Добавить расход",
-                                   command=lambda: add_transaction(amount_entry.get(),
-                                                                   category_var.get(),
-                                                                   description_entry.get(),
-                                                                   "расход"))
-    add_expense_button.grid(row=3, column=1, pady=10)
+    add_income_button = tk.Button(button_frame, text="Добавить доход", font=("Helvetica", 12),
+                                  command=lambda: add_transaction(amount_entry.get(), category_var.get(),
+                                                                  description_entry.get(), "доход"))
+    add_income_button.pack(side=tk.LEFT, padx=5, pady=5)
 
-    add_category_button = tk.Button(input_frame, text="Добавить новую категорию", command=add_new_category)
-    add_category_button.grid(row=4, column=0, pady=10)
+    add_expense_button = tk.Button(button_frame, text="Добавить расход", font=("Helvetica", 12),
+                                   command=lambda: add_transaction(amount_entry.get(), category_var.get(),
+                                                                   description_entry.get(), "расход"))
+    add_expense_button.pack(side=tk.LEFT, padx=5, pady=5)
 
-    delete_category_button = tk.Button(input_frame, text="Удалить категорию", command=delete_category)
-    delete_category_button.grid(row=4, column=1, pady=10)
+    add_category_button = tk.Button(button_frame, text="Добавить новую категорию", font=("Helvetica", 12),
+                                    command=add_new_category)
+    add_category_button.pack(side=tk.LEFT, padx=5, pady=5)
 
-    edit_transaction_button = tk.Button(input_frame, text="Редактировать транзакцию", command=edit_transaction)
-    edit_transaction_button.grid(row=5, columnspan=2, pady=10)
+    delete_category_button = tk.Button(button_frame, text="Удалить категорию", font=("Helvetica", 12),
+                                       command=delete_category)
+    delete_category_button.pack(side=tk.LEFT, padx=5, pady=5)
 
-    balance_label = tk.Label(root, text="Баланс: 0.00 руб.")
-    balance_label.pack(pady=10)
+    edit_transaction_button = tk.Button(button_frame, text="Редактировать транзакцию", font=("Helvetica", 12),
+                                        command=edit_transaction)
+    edit_transaction_button.pack(side=tk.LEFT, padx=5, pady=5)
 
-    transaction_list = tk.Listbox(root, width=50)
-    transaction_list.pack(pady=10)
+    balance_label = tk.Label(main_frame, text="Баланс: 0.00 руб.", font=("Helvetica", 16, "bold"), bg="#f0f0f0")
+    balance_label.pack(pady=(0, 20))
 
-    fig = plt.Figure(figsize=(5, 4), dpi=100)
-    canvas = FigureCanvasTkAgg(fig, master=root)
-    canvas.get_tk_widget().pack()
+    transaction_list = tk.Listbox(main_frame, width=80, height=10, font=("Helvetica", 12))
+    transaction_list.pack(pady=(0, 20))
+
+    fig = plt.Figure(figsize=(8, 6), dpi=100)
+    canvas = FigureCanvasTkAgg(fig, master=main_frame)
+    canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
 
     # Обновление интерфейса с загруженными данными
     update_balance()
