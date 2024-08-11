@@ -4,9 +4,12 @@ import json
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from ttkthemes import ThemedTk
+import os
 
 # Путь к файлу для сохранения данных
 DATA_FILE = "transactions_data.json"
+# Путь к файлу для логов
+LOG_FILE = "application_log.txt"
 
 # Список транзакций
 transactions = []
@@ -14,6 +17,10 @@ transactions = []
 # Изначальные категории
 categories = ["Еда", "Транспорт", "Развлечения", "Коммунальные услуги", "Прочее"]
 
+def log_message(message):
+    """Записывает сообщение в файл лога."""
+    with open(LOG_FILE, "w", encoding="utf-8") as log_file:
+        log_file.write(message + "\n")
 
 def save_data():
     """Сохраняет транзакции и категории в файл."""
@@ -23,25 +30,32 @@ def save_data():
     }
     with open(DATA_FILE, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=4)
-
+    log_message("Данные сохранены.")
 
 def load_data():
     """Загружает транзакции и категории из файла."""
     global transactions, categories
     try:
-        with open(DATA_FILE, "r", encoding="utf-8") as f:
-            data = json.load(f)
-            transactions = data.get("transactions", [])
-            categories = data.get("categories", ["Еда", "Транспорт", "Развлечения", "Коммунальные услуги", "Прочее"])
-    except FileNotFoundError:
-        save_data()  # Создать файл, если его нет
-
+        if os.path.exists(DATA_FILE):
+            with open(DATA_FILE, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                transactions = data.get("transactions", [])
+                categories = data.get("categories", ["Еда", "Транспорт", "Развлечения", "Коммунальные услуги", "Прочее"])
+            log_message("Данные загружены из файла.")
+        else:
+            save_data()  # Создать файл, если его нет
+            log_message("Файл данных не найден. Создан новый файл.")
+    except Exception as e:
+        log_message(f"Ошибка при загрузке данных: {e}")
 
 def add_transaction(amount, category, description, transaction_type):
     try:
         amount = float(amount)
-    except ValueError:
-        messagebox.showerror("Некорректный ввод", "Пожалуйста, введите корректную сумму.")
+        if amount <= 0:
+            raise ValueError("Сумма должна быть положительной.")
+    except ValueError as e:
+        messagebox.showerror("Некорректный ввод", f"Ошибка: {e}")
+        log_message(f"Не удалось добавить транзакцию: {e}")
         return
 
     transaction = {
@@ -51,22 +65,22 @@ def add_transaction(amount, category, description, transaction_type):
     }
     transactions.append(transaction)
     save_data()
+    log_message(f"Добавлена транзакция: {transaction}")
     update_balance()
     update_transactions_list()
     update_plot()
 
-
 def update_balance():
     total_balance = sum([t["amount"] for t in transactions])
     balance_label.config(text=f"Баланс: {total_balance:.2f} руб.")
-
+    log_message(f"Баланс обновлен: {total_balance:.2f} руб.")
 
 def update_transactions_list():
     transaction_list.delete(0, tk.END)
     for i, transaction in enumerate(transactions):
         transaction_list.insert(tk.END,
                                 f"{i + 1}. {transaction['category']}: {transaction['description']} ({transaction['amount']:.2f} руб.)")
-
+    log_message("Список транзакций обновлен.")
 
 def update_plot():
     expenses = {}
@@ -87,7 +101,7 @@ def update_plot():
     ax.pie(amounts_plot, labels=categories_plot, autopct='%1.1f%%', startangle=140)
     ax.set_title('Расходы по категориям')
     canvas.draw()
-
+    log_message("Диаграмма обновлена.")
 
 def add_new_category():
     new_category = simpledialog.askstring("Новая категория", "Введите название новой категории:")
@@ -96,7 +110,7 @@ def add_new_category():
         category_var.set(new_category)  # Выбрать новую категорию
         category_menu['menu'].add_command(label=new_category, command=tk._setit(category_var, new_category))
         save_data()
-
+        log_message(f"Добавлена новая категория: {new_category}")
 
 def delete_category():
     if len(categories) > 1:
@@ -116,9 +130,10 @@ def delete_category():
         update_transactions_list()
         update_plot()
         save_data()
+        log_message(f"Удалена категория: {category_to_delete}")
     else:
         messagebox.showwarning("Предупреждение", "Должна остаться хотя бы одна категория!")
-
+        log_message("Попытка удалить последнюю категорию.")
 
 def edit_transaction():
     try:
@@ -144,10 +159,11 @@ def edit_transaction():
         update_balance()
         update_plot()
         save_data()
+        log_message(f"Отредактирована транзакция: {transaction}")
 
     except IndexError:
         messagebox.showwarning("Ошибка", "Выберите транзакцию для редактирования")
-
+        log_message("Попытка редактирования несуществующей транзакции.")
 
 def main():
     global balance_label, transaction_list, category_var, category_menu, fig, canvas
@@ -232,7 +248,6 @@ def main():
     update_plot()
 
     root.mainloop()
-
 
 if __name__ == "__main__":
     main()
